@@ -12,10 +12,7 @@ find_package(Protobuf REQUIRED)
 find_package(gRPC REQUIRED)
 find_package(opentelemetry-cpp REQUIRED)
 find_package(CURL REQUIRED)
-find_package(Thrift REQUIRED)
 find_package(absl REQUIRED)
-
-include(cmake/bundle_libs.cmake)
 
 add_library(SplunkOpenTelemetry
   src/opentelemetry.cpp

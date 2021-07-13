@@ -67,51 +67,53 @@ std::string GetEnv(const std::string& key, const std::string& defaultVal = "") {
   return ToLower(Trim(std::string(envVal)));
 }
 
-std::unique_ptr<sdktrace::SpanExporter> CreateOtlpExporter(const OpenTelemetryOptions& options) {
+std::unique_ptr<sdktrace::SpanExporter> CreateOtlpExporter(const OpenTelemetryOptions& sdkOptions) {
   std::string protocol = GetEnv("OTEL_EXPORTER_OTLP_PROTOCOL", "grpc");
 
   if (protocol == "http/json") {
     auto endpoint = GetEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317/v1/traces");
 
-    opentelemetry::exporter::otlp::OtlpHttpExporterOptions options;
-    options.url = endpoint;
-    options.content_type = opentelemetry::exporter::otlp::HttpRequestContentType::kJson;
+    opentelemetry::exporter::otlp::OtlpHttpExporterOptions exporterOptions;
+    exporterOptions.url = endpoint;
+    exporterOptions.content_type = opentelemetry::exporter::otlp::HttpRequestContentType::kJson;
 
     return std::unique_ptr<sdktrace::SpanExporter>(
-      new opentelemetry::exporter::otlp::OtlpHttpExporter(options));
+      new opentelemetry::exporter::otlp::OtlpHttpExporter(exporterOptions));
   }
 
   if (protocol == "http/protobuf") {
     auto endpoint = GetEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317/v1/traces");
 
-    opentelemetry::exporter::otlp::OtlpHttpExporterOptions options;
-    options.url = endpoint;
-    options.content_type = opentelemetry::exporter::otlp::HttpRequestContentType::kBinary;
+    opentelemetry::exporter::otlp::OtlpHttpExporterOptions exporterOptions;
+    exporterOptions.url = endpoint;
+    exporterOptions.content_type = opentelemetry::exporter::otlp::HttpRequestContentType::kBinary;
 
     return std::unique_ptr<sdktrace::SpanExporter>(
-      new opentelemetry::exporter::otlp::OtlpHttpExporter(options));
+      new opentelemetry::exporter::otlp::OtlpHttpExporter(exporterOptions));
   }
 
   // Default to grpc
-  auto endpoint = options.otlpEndpoint.empty() ? GetEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "localhost:4317") : options.otlpEndpoint;
+  auto endpoint = sdkOptions.otlpEndpoint.empty()
+                    ? GetEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "localhost:4317")
+                    : sdkOptions.otlpEndpoint;
 
-  opentelemetry::exporter::otlp::OtlpGrpcExporterOptions options;
-  options.endpoint = endpoint;
+  opentelemetry::exporter::otlp::OtlpGrpcExporterOptions exporterOptions;
+  exporterOptions.endpoint = endpoint;
 
   return std::unique_ptr<sdktrace::SpanExporter>(
-    new opentelemetry::exporter::otlp::OtlpGrpcExporter(options));
+    new opentelemetry::exporter::otlp::OtlpGrpcExporter(exporterOptions));
 }
 
-std::unique_ptr<sdktrace::SpanExporter> CreateExporter() {
+std::unique_ptr<sdktrace::SpanExporter> CreateExporter(const OpenTelemetryOptions& options) {
   auto exporterType = GetEnv("OTEL_TRACES_EXPORTER", "otlp");
 
   if (exporterType == "otlp") {
-    return CreateOtlpExporter();
+    return CreateOtlpExporter(options);
   }
 
   // TODO: jaeger-thrift-splunk once OpenTelemetry CPP's Jaeger exporter supports HTTP.
 
-  return CreateOtlpExporter();
+  return CreateOtlpExporter(options);
 }
 
 sdkresource::Resource GetEnvResource(const sdkresource::ResourceAttributes& options) {
@@ -212,7 +214,7 @@ InitOpentelemetry(const OpenTelemetryOptions& options) {
 
   auto resource = sdkresource::Resource::Create(options.resourceAttributes).Merge(envResource);
 
-  auto exporter = CreateExporter();
+  auto exporter = CreateExporter(options);
   sdktrace::BatchSpanProcessorOptions processorOptions;
   auto processor = std::unique_ptr<sdktrace::SpanProcessor>(
     new sdktrace::BatchSpanProcessor(std::move(exporter), processorOptions));

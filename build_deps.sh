@@ -1,3 +1,5 @@
+set -x
+
 mkdir -p third_party
 
 BUILD_TYPE=Release
@@ -43,5 +45,6 @@ cmake \
   -DBUILD_TESTING=OFF \
   -DWITH_EXAMPLES=OFF \
   "$@" \
+  ..
 make -j$(nproc)
 make install
