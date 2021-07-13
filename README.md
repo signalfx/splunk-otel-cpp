@@ -103,6 +103,10 @@ Possible values: `tracecontext`, `b3`, `b3multi`, `baggage` |
 | OTEL_EXPORTER_OTLP_PROTOCOL          | `grpc`                        | OTLP transport to use. Possible values: `otlp`, `http/protobuf`, `http/json` |
 | OTEL_EXPORTER_OTLP_ENDPOINT          | `localhost:4317` (gRPC) or `http://localhost:4317/v1/traces` | 
 
+## Requirements
+
+* C++11 capable compiler
+* Linux (Windows support coming)
 
 # License and versioning
 
