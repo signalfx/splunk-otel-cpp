@@ -11,7 +11,6 @@ find_dependency(Protobuf REQUIRED)
 find_dependency(gRPC REQUIRED)
 find_dependency(opentelemetry-cpp REQUIRED)
 find_dependency(CURL REQUIRED)
-find_dependency(Thrift REQUIRED)
 find_dependency(absl REQUIRED)
 
 get_filename_component(SplunkOpenTelemetry_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
