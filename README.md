@@ -96,14 +96,11 @@ Note: options passed via `splunk::OpenTelemetryOptions` take preference over env
 | Environment variable                 | Default value                 | Notes
 | -----------------------------        | ----------------------------- | ------------------------------------ |
 | OTEL_SERVICE_NAME                    | `unknown_service`             | Service name of the application      |
-| OTEL_RESOURCE_ATTRIBUTES             | none                          | Comma separated list of
-[Resource](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/sdk.md#resource-sdk)
-attributes. For example `OTEL_RESOURCE_ATTRIBUTES=service.name=foo,deployment.environment=production` |
+| OTEL_RESOURCE_ATTRIBUTES             | none                          | Comma separated list of [Resource](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/sdk.md#resource-sdk) attributes. For example `OTEL_RESOURCE_ATTRIBUTES=service.name=foo,deployment.environment=production` |
 | OTEL_PROPAGATORS                     | `tracecontext,baggage`        | Comma separated list of propagators to use.
 Possible values: `tracecontext`, `b3`, `b3multi`, `baggage` |
-| OTEL_TRACES_EXPORTER                 | `otlp`                        | Trace exporter to use. Possible values: `otlp`.
-| OTEL_EXPORTER_OTLP_PROTOCOL          | `grpc`                        | OTLP transport to use. Possible values: `otlp`,
-`http/protobuf`, `http/json` |
+| OTEL_TRACES_EXPORTER                 | `otlp`                        | Trace exporter to use. Possible values: `otlp`. |
+| OTEL_EXPORTER_OTLP_PROTOCOL          | `grpc`                        | OTLP transport to use. Possible values: `otlp`, `http/protobuf`, `http/json` |
 | OTEL_EXPORTER_OTLP_ENDPOINT          | `localhost:4317` (gRPC) or `http://localhost:4317/v1/traces` | 
 
 
