@@ -13,6 +13,7 @@ find_package(gRPC REQUIRED)
 find_package(opentelemetry-cpp REQUIRED)
 find_package(CURL REQUIRED)
 find_package(absl REQUIRED)
+find_package(nlohmann_json REQUIRED)
 
 add_library(SplunkOpenTelemetry
   src/opentelemetry.cpp

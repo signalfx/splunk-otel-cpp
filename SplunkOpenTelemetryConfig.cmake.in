@@ -12,6 +12,7 @@ find_dependency(gRPC REQUIRED)
 find_dependency(opentelemetry-cpp REQUIRED)
 find_dependency(CURL REQUIRED)
 find_dependency(absl REQUIRED)
+find_dependency(nlohmann_jsoN REQUIRED)
 
 get_filename_component(SplunkOpenTelemetry_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
 set_and_check(SplunkOpenTelemetry_INCLUDE_DIRS "@PACKAGE_INCLUDE_INSTALL_DIR@")
