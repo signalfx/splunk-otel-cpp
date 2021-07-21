@@ -103,6 +103,7 @@ int main(int argc, char** argv) {
 
     if (bytesRead <= 0) {
       close(clientFd);
+      continue;
     }
 
     /* Parse the parent span context */

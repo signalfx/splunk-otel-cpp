@@ -20,6 +20,7 @@ namespace nostd = opentelemetry::nostd;
 
 namespace splunk {
 
+namespace {
 std::string ToLower(std::string v) {
   for (size_t i = 0; i < v.size(); i++) {
     v[i] = std::tolower(v[i]);
@@ -205,6 +206,8 @@ void SetupPropagators(PropagatorFlags flags) {
 
   contextprop::GlobalTextMapPropagator::SetGlobalPropagator(composite);
 }
+
+} // namespace
 
 opentelemetry::nostd::shared_ptr<opentelemetry::trace::TracerProvider>
 InitOpentelemetry(const OpenTelemetryOptions& options) {
