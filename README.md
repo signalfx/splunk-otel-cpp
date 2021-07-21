@@ -19,38 +19,97 @@
 
 # Splunk Distribution of OpenTelemetry C++
 
-The Splunk Distribution of [OpenTelemetry
-C++](https://github.com/open-telemetry/opentelemetry-cpp-contrib) provides
-multiple installable packages that automatically instruments your C++
-application to capture and report distributed traces to Splunk APM.
+The Splunk Distribution of [OpenTelemetry C++](https://github.com/open-telemetry/opentelemetry-cpp) is a wrapper that
+comes with defaults suitable to report distributed traces to Splunk APM.
 
 This distribution comes with the following defaults:
 
 - [W3C `tracecontext`](https://www.w3.org/TR/trace-context/) context
   propagation; [B3](https://github.com/openzipkin/b3-propagation) can also be
   configured.
-- [OTLP
-  exporter](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/README.md)
+- [OTLP exporter](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/protocol/README.md)
   configured to send spans to a locally running [Splunk OpenTelemetry
   Connector](https://github.com/signalfx/splunk-otel-collector)
-  (`http://localhost:4317`); [Jaeger Thrift
-  exporter](https://github.com/signalfx/splunk-otel-java/blob/main/docs/advanced-config.md#trace-exporters)
-  available for [Smart Agent](https://github.com/signalfx/signalfx-agent)
-  (`http://localhost:9080/v1/trace`).
+  (`http://localhost:4317`);
 
 > :construction: This project is currently in **BETA**. It is **officially supported** by Splunk. However, breaking changes **MAY** be introduced.
 
 ## Getting Started
 
-Download one of the released packages and follow the directions:
+1. Clone the repository along with submodules
+```bash
+$ git clone --recurse-submodules https://github.com/signalfx/splunk-otel-cpp.git
+```
 
-- [Apache httpd](https://github.com/open-telemetry/opentelemetry-cpp-contrib/tree/main/instrumentation/httpd)
-- [Nginx](https://github.com/open-telemetry/opentelemetry-cpp-contrib/tree/main/instrumentation/nginx)
+2. Build the dependencies and the project
+
+```bash
+$ ./build_deps.sh -DCMAKE_INSTALL_PREFIX=/path/to/splunk-otel-cpp-install
+$ mkdir build
+$ cd build
+$ cmake -DCMAKE_INSTALL_PREFIX=/path/to/splunk-otel-cpp-install -DCMAKE_PREFIX_PATH=/path/to/splunk-otel-cpp-install ..
+$ make install
+```
+
+3. When using CMake, find the Splunk OpenTelemetry package at `/path/to/splunk-otel-cpp-install`
+
+```CMake
+find_package(SplunkOpenTelemetry REQUIRED)
+add_program(example example.cpp)
+target_link_libraries(example ${SplunkOpenTelemetry_LIBRARIES})
+target_include_directories(example ${SplunkOpenTelemetry_INCLUDE_DIRS})
+```
+
+4. Use it
+
+```c++
+#include <splunk/opentelemetry.h>
+
+int main(int argc, char** argv) {
+  splunk::OpenTelemetryOptions options =
+    splunk::OpenTelemetryOptions()
+      .WithServiceName("my-service");
+
+  splunk::InitOpenTelemetry(options);
+
+  // Use the usual OpenTelemetry API
+  auto tracer = opentelemetry::trace::Provider::GetTraceProvider()->GetTracer("my-tracer");
+  auto span = tracer->StartSpan("operation-name");
+
+  // Do something useful
+  span->End();
+
+  return 0;
+}
+
+```
+
+For more examples, see the `examples` directory.
+
+## Configuration options
+
+
+### Via environment variables
+
+Note: options passed via `splunk::OpenTelemetryOptions` take preference over environment variables.
+
+| Environment variable                 | Default value                 | Notes
+| -----------------------------        | ----------------------------- | ------------------------------------ |
+| OTEL_SERVICE_NAME                    | `unknown_service`             | Service name of the application      |
+| OTEL_RESOURCE_ATTRIBUTES             | none                          | Comma separated list of [Resource](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/sdk.md#resource-sdk) attributes. For example `OTEL_RESOURCE_ATTRIBUTES=service.name=foo,deployment.environment=production` |
+| OTEL_PROPAGATORS                     | `tracecontext,baggage`        | Comma separated list of propagators to use.
+Possible values: `tracecontext`, `b3`, `b3multi`, `baggage` |
+| OTEL_TRACES_EXPORTER                 | `otlp`                        | Trace exporter to use. Possible values: `otlp`. |
+| OTEL_EXPORTER_OTLP_PROTOCOL          | `grpc`                        | OTLP transport to use. Possible values: `otlp`, `http/protobuf`, `http/json` |
+| OTEL_EXPORTER_OTLP_ENDPOINT          | `localhost:4317` (gRPC) or `http://localhost:4317/v1/traces` | 
+
+## Requirements
+
+* C++11 capable compiler
+* Linux (Windows support coming)
 
 # License and versioning
 
 The Splunk Distribution of OpenTelemetry C++ is a distribution
-of the [OpenTelemetry C++ Contrib
-project](https://github.com/open-telemetry/opentelemetry-cpp-contrib).
-It is released under the terms of the Apache Software License version 2.0. See
-[the license file](./LICENSE) for more details.
+of the [OpenTelemetry C++ project](https://github.com/open-telemetry/opentelemetry-cpp).
+It is released under the terms of the Apache Software License version 2.0. See [the license file](./LICENSE) for more details.
