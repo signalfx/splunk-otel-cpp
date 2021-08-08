@@ -1,0 +1,30 @@
+name: Splunk OpenTelemetry CPP CI
+
+on:
+  push:
+    branches: "*"
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: install packages
+        run: sudo apt install cmake
+      - name: build deps
+        run: |
+          mkdir -p $HOME/splunk-otel-cpp
+          ./build_deps.sh -DCMAKE_INSTALL_PREFIX=$HOME/splunk-otel-cpp
+      - name: build distro
+        run: |
+          mkdir -p build
+          cd build
+          cmake -DCMAKE_INSTALL_PREFIX=$HOME/splunk-otel-cpp \
+            -DCMAKE_PREFIX_PATH=$HOME/splunk-otel-cpp \
+            ..
+          make install
