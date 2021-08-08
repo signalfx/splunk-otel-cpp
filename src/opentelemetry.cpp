@@ -1,8 +1,10 @@
+#include <opentelemetry/sdk/trace/exporter.h>
 #include <splunk/opentelemetry.h>
 
 #include <opentelemetry/baggage/propagation/baggage_propagator.h>
 #include <opentelemetry/context/propagation/composite_propagator.h>
 #include <opentelemetry/context/propagation/global_propagator.h>
+#include <opentelemetry/exporters/jaeger/jaeger_exporter.h>
 #include <opentelemetry/exporters/otlp/otlp_grpc_exporter.h>
 #include <opentelemetry/exporters/otlp/otlp_http_exporter.h>
 #include <opentelemetry/sdk/trace/batch_span_processor.h>
@@ -103,6 +105,17 @@ std::unique_ptr<sdktrace::SpanExporter> CreateOtlpExporter(const OpenTelemetryOp
 
   return std::unique_ptr<sdktrace::SpanExporter>(
     new opentelemetry::exporter::otlp::OtlpGrpcExporter(exporterOptions));
+}
+
+std::unique_ptr<sdktrace::SpanExporter>
+CreateJaegerExporter(const OpenTelemetryOptions& sdkOptions) {
+  opentelemetry::exporter::jaeger::JaegerExporterOptions options;
+  options.endpoint = "http://localhost:9080/apxi/traces";
+  options.transport_format = opentelemetry::exporter::jaeger::TransportFormat::kThriftHttp;
+  auto exporter = std::unique_ptr<sdktrace::SpanExporter>(
+    new opentelemetry::exporter::jaeger::JaegerExporter(options));
+
+  return exporter;
 }
 
 std::unique_ptr<sdktrace::SpanExporter> CreateExporter(const OpenTelemetryOptions& options) {

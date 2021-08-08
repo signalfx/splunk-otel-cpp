@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 find_package(Protobuf REQUIRED)
 find_package(gRPC REQUIRED)
+find_package(Thrift REQUIRED)
 find_package(opentelemetry-cpp REQUIRED)
 find_package(CURL REQUIRED)
 find_package(absl REQUIRED)

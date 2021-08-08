@@ -13,6 +13,11 @@ enum PropagatorFlags {
   Propagator_Baggage = 0x08,
 };
 
+enum class ExporterType {
+  Otlp,
+  JaegerThriftHttp,
+};
+
 inline PropagatorFlags operator|(PropagatorFlags a, PropagatorFlags b) {
   return static_cast<PropagatorFlags>(static_cast<int>(a) | static_cast<int>(b));
 }
