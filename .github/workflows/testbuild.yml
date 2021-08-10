@@ -21,7 +21,7 @@ jobs:
       - name: Wait for collector
         run: |
           timeout 30 \
-          bash -c 'while [[ "$(curl -s -o /dev/null -w ''{%http_code}'' localhost:13134" != "200" ]]; do sleep 1; done' || false
+          bash -c 'while [[ "$(curl -s -o /dev/null -w ''{%http_code}'' localhost:13134)" != "200" ]]; do sleep 1; done' || false
       - name: build deps
         run: |
           mkdir -p $HOME/splunk-otel-cpp
