@@ -20,6 +20,9 @@ jobs:
         run: cd test && docker-compose up -d
       - name: Wait for collector
         run: |
+          sleep 10
+          curl localhost:13133
+          curl -I localhost:13133
           timeout 30 \
           bash -c 'while [[ "$(curl -s -o /dev/null -w ''{%http_code}'' localhost:13133)" != "200" ]]; do sleep 1; done' || false
       - name: build deps
