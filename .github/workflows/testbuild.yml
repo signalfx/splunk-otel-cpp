@@ -16,12 +16,6 @@ jobs:
           submodules: 'recursive'
       - name: install packages
         run: sudo apt install cmake libcurl4-openssl-dev
-      - name: Spin up collector image
-        run: cd test && docker-compose up -d
-      - name: Wait for collector
-        timeout-minutes: 1
-        run: |
-          while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:13133)" != "200" ]]; do sleep 1; done || false
       - name: build deps
         run: |
           mkdir -p $HOME/splunk-otel-cpp
@@ -34,5 +28,11 @@ jobs:
             -DCMAKE_PREFIX_PATH=$HOME/splunk-otel-cpp \
             ..
           make install
+      - name: Spin up collector image
+        run: cd test && docker-compose up -d
+      - name: Wait for collector
+        timeout-minutes: 1
+        run: |
+          while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:13133)" != "200" ]]; do sleep 1; done || false
       - name: run smoke tests
         run: cd build && make test
