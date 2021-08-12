@@ -1,0 +1,38 @@
+name: Build and test
+
+on:
+  push:
+    branches: "*"
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+      - name: install packages
+        run: sudo apt install cmake libcurl4-openssl-dev
+      - name: build deps
+        run: |
+          mkdir -p $HOME/splunk-otel-cpp
+          ./build_deps.sh -DCMAKE_INSTALL_PREFIX=$HOME/splunk-otel-cpp
+      - name: build distro
+        run: |
+          mkdir -p build
+          cd build
+          cmake -DCMAKE_INSTALL_PREFIX=$HOME/splunk-otel-cpp \
+            -DCMAKE_PREFIX_PATH=$HOME/splunk-otel-cpp \
+            ..
+          make install
+      - name: Spin up collector image
+        run: cd test && docker-compose up -d
+      - name: Wait for collector
+        timeout-minutes: 1
+        run: |
+          while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:13133)" != "200" ]]; do sleep 1; done || false
+      - name: run smoke tests
+        run: cd build && make test

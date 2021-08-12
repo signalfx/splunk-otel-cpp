@@ -1,0 +1,25 @@
+receivers:
+  jaeger:
+    protocols:
+      thrift_http:
+        endpoint: 0.0.0.0:14268
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+exporters:
+  logging:
+    logLevel: debug
+  file:
+    path: /trace.json
+processors:
+  batch:
+extensions:
+  health_check:
+service:
+  pipelines:
+    traces:
+      receivers: [otlp, jaeger]
+      processors: [batch]
+      exporters: [logging, file]
+  extensions: [health_check]

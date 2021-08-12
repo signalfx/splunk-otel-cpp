@@ -16,10 +16,12 @@ find_package(CURL REQUIRED)
 find_package(absl REQUIRED)
 find_package(nlohmann_json REQUIRED)
 
+option(SPLUNK_CPP_TESTS "Enable building of tests" ON)
+
 add_library(SplunkOpenTelemetry
   src/opentelemetry.cpp
 )
-
+ 
 target_link_libraries(SplunkOpenTelemetry
   PUBLIC
   ${OPENTELEMETRY_CPP_LIBRARIES}
@@ -107,3 +109,8 @@ export(EXPORT SplunkOpenTelemetryTargets
 )
 
 export(TARGETS SplunkOpenTelemetry NAMESPACE SplunkOpenTelemetry:: FILE SplunkOpenTelemetryTargets.cmake)
+
+if (SPLUNK_CPP_TESTS)
+  include(CTest)
+  add_subdirectory(test)
+endif()
