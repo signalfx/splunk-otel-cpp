@@ -11,5 +11,5 @@ services:
       - SPLUNK_ACCESS_TOKEN=test
     ports:
       - "13133:13133"
-      - "14268:14268"
       - "4317:4317"
+      - "9080:9080"

@@ -1,4 +1,4 @@
-set -x
+set -ex
 
 mkdir -p third_party
 
@@ -34,13 +34,32 @@ cmake \
 make -j$(nproc)
 make install
 
+mkdir -p ${ROOT_DIR}/thrift/cmake_build
+cd ${ROOT_DIR}/thrift/cmake_build
+cmake \
+  -DBUILD_TESTING=OFF \
+  -DWITH_LIBEVENT=OFF \
+  -DWITH_QT5=OFF \
+  -DWITH_ZLIB=OFF \
+  -DBUILD_COMPILER=OFF \
+  -DBUILD_AS3=OFF \
+  -DBUILD_JAVA=OFF \
+  -DBUILD_JAVASCRIPT=OFF \
+  -DBUILD_NODEJS=OFF \
+  -DBUILD_PYTHON=OFF \
+  -DBUILD_HASKELL=OFF \
+  "$@" \
+   ..
+make -j$(nproc)
+make install
+
 mkdir -p ${ROOT_DIR}/opentelemetry-cpp/build
 cd ${ROOT_DIR}/opentelemetry-cpp/build
 cmake \
   -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
   -DCMAKE_PREFIX_PATH=${THIRD_PARTY_DIR} \
   -DWITH_OTLP=ON \
-  -DWITH_JAEGER=OFF \
+  -DWITH_JAEGER=ON \
   -DWITH_ABSEIL=ON \
   -DBUILD_TESTING=OFF \
   -DWITH_EXAMPLES=OFF \

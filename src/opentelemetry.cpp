@@ -3,9 +3,11 @@
 #include <opentelemetry/baggage/propagation/baggage_propagator.h>
 #include <opentelemetry/context/propagation/composite_propagator.h>
 #include <opentelemetry/context/propagation/global_propagator.h>
+#include <opentelemetry/exporters/jaeger/jaeger_exporter.h>
 #include <opentelemetry/exporters/otlp/otlp_grpc_exporter.h>
 #include <opentelemetry/exporters/otlp/otlp_http_exporter.h>
 #include <opentelemetry/sdk/trace/batch_span_processor.h>
+#include <opentelemetry/sdk/trace/exporter.h>
 #include <opentelemetry/sdk/trace/tracer_provider.h>
 #include <opentelemetry/trace/propagation/b3_propagator.h>
 #include <opentelemetry/trace/propagation/http_trace_context.h>
@@ -68,78 +70,61 @@ std::string GetEnv(const std::string& key, const std::string& defaultVal = "") {
   return ToLower(Trim(std::string(envVal)));
 }
 
-std::unique_ptr<sdktrace::SpanExporter> CreateOtlpExporter(const OpenTelemetryOptions& sdkOptions) {
-  std::string protocol = GetEnv("OTEL_EXPORTER_OTLP_PROTOCOL", "grpc");
-
-  if (protocol == "http/json") {
-    auto endpoint = GetEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317/v1/traces");
-
+std::unique_ptr<sdktrace::SpanExporter> CreateOtlpExporter(const OpenTelemetryOptions& options) {
+  if (options.otlpProtocol == "http/json") {
     opentelemetry::exporter::otlp::OtlpHttpExporterOptions exporterOptions;
-    exporterOptions.url = endpoint;
+    exporterOptions.url = options.otlpEndpoint;
     exporterOptions.content_type = opentelemetry::exporter::otlp::HttpRequestContentType::kJson;
 
     return std::unique_ptr<sdktrace::SpanExporter>(
       new opentelemetry::exporter::otlp::OtlpHttpExporter(exporterOptions));
   }
 
-  if (protocol == "http/protobuf") {
-    auto endpoint = GetEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317/v1/traces");
-
+  if (options.otlpProtocol == "http/protobuf") {
     opentelemetry::exporter::otlp::OtlpHttpExporterOptions exporterOptions;
-    exporterOptions.url = endpoint;
+    exporterOptions.url = options.otlpEndpoint;
     exporterOptions.content_type = opentelemetry::exporter::otlp::HttpRequestContentType::kBinary;
 
     return std::unique_ptr<sdktrace::SpanExporter>(
       new opentelemetry::exporter::otlp::OtlpHttpExporter(exporterOptions));
   }
 
-  // Default to grpc
-  auto endpoint = sdkOptions.otlpEndpoint.empty()
-                    ? GetEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "localhost:4317")
-                    : sdkOptions.otlpEndpoint;
-
   opentelemetry::exporter::otlp::OtlpGrpcExporterOptions exporterOptions;
-  exporterOptions.endpoint = endpoint;
+  exporterOptions.endpoint = options.otlpEndpoint;
 
   return std::unique_ptr<sdktrace::SpanExporter>(
     new opentelemetry::exporter::otlp::OtlpGrpcExporter(exporterOptions));
 }
 
-std::unique_ptr<sdktrace::SpanExporter> CreateExporter(const OpenTelemetryOptions& options) {
-  auto exporterType = GetEnv("OTEL_TRACES_EXPORTER", "otlp");
+std::unique_ptr<sdktrace::SpanExporter> CreateJaegerExporter(const OpenTelemetryOptions& options) {
+  opentelemetry::exporter::jaeger::JaegerExporterOptions jaegerOptions;
+  jaegerOptions.endpoint = options.jaegerEndpoint;
 
-  if (exporterType == "otlp") {
-    return CreateOtlpExporter(options);
+  if (!options.accessToken.empty()) {
+    jaegerOptions.headers = {{"X-SF-TOKEN", options.accessToken}};
   }
 
-  // TODO: jaeger-thrift-splunk once OpenTelemetry CPP's Jaeger exporter supports HTTP.
+  jaegerOptions.transport_format = opentelemetry::exporter::jaeger::TransportFormat::kThriftHttp;
+  auto exporter = std::unique_ptr<sdktrace::SpanExporter>(
+    new opentelemetry::exporter::jaeger::JaegerExporter(jaegerOptions));
 
-  return CreateOtlpExporter(options);
+  return exporter;
 }
 
-sdkresource::Resource GetEnvResource(const sdkresource::ResourceAttributes& options) {
+std::unique_ptr<sdktrace::SpanExporter> CreateExporter(const OpenTelemetryOptions& options) {
+  switch (options.exporterType) {
+    case ExporterType_JaegerThriftHttp:
+      return CreateJaegerExporter(options);
+    default: {
+      return CreateOtlpExporter(options);
+    }
+  }
+}
+
+std::unordered_map<std::string, std::string> GetEnvResourceAttribs() {
   auto rawAttribs = GetEnv("OTEL_RESOURCE_ATTRIBUTES", "");
 
-  sdkresource::ResourceAttributes attributes;
-
-  // Workaround: creating a resource with empty attributes sets the service.name to unknown_service
-  // which will overwrite the service name given in options.
-  if (options.count("service.name")) {
-    auto serviceName = options.at("service.name");
-    if (nostd::holds_alternative<std::string>(serviceName)) {
-      attributes.SetAttribute("service.name", nostd::get<std::string>(serviceName));
-    }
-  } else {
-    auto envServiceName = GetEnv("OTEL_SERVICE_NAME", "");
-
-    if (!envServiceName.empty()) {
-      attributes.SetAttribute("service.name", envServiceName);
-    }
-  }
-
-  if (rawAttribs.empty()) {
-    return sdkresource::Resource::Create(attributes);
-  }
+  std::unordered_map<std::string, std::string> attributes;
 
   std::vector<nostd::string_view> tokens = Split(rawAttribs, ',');
 
@@ -147,57 +132,73 @@ sdkresource::Resource GetEnvResource(const sdkresource::ResourceAttributes& opti
     std::vector<nostd::string_view> parts = Split(token, '=');
 
     if (parts.size() == 2) {
-      attributes.SetAttribute(parts[0], parts[1]);
+      attributes[std::string(parts[0])] = std::string(parts[1]);
     }
   }
 
-  return sdkresource::Resource::Create(attributes);
+  auto envServiceName = GetEnv("OTEL_SERVICE_NAME", "");
+
+  if (!envServiceName.empty()) {
+    attributes["service.name"] = envServiceName;
+  }
+
+  return attributes;
 }
 
-PropagatorFlags EnvPropagatorFlags() {
+sdkresource::ResourceAttributes MergeEnvAttributes(
+  sdkresource::ResourceAttributes target,
+  const std::unordered_map<std::string, std::string>& source) {
+  for (const auto& attribute : source) {
+    if (target.GetAttributes().count(attribute.first) == 0) {
+      target.SetAttribute(attribute.first, attribute.second);
+    }
+  }
+
+  return target;
+}
+
+PropagatorType EnvPropagatorFlags() {
   auto envPropagators = GetEnv("OTEL_PROPAGATORS", "tracecontext,baggage");
 
   std::vector<nostd::string_view> propagators = Split(envPropagators, ',');
 
-  PropagatorFlags flags = Propagator_None;
+  int flags = PropagatorType_None;
 
   for (nostd::string_view propagator : propagators) {
     if (propagator == "tracecontext") {
-      flags |= Propagator_TraceContext;
+      flags |= PropagatorType_TraceContext;
     } else if (propagator == "b3") {
-      flags |= Propagator_B3;
+      flags |= PropagatorType_B3;
     } else if (propagator == "b3multi") {
-      flags |= Propagator_B3Multi;
+      flags |= PropagatorType_B3Multi;
     } else if (propagator == "baggage") {
-      flags |= Propagator_Baggage;
+      flags |= PropagatorType_Baggage;
     }
   }
 
-  return flags;
+  return static_cast<PropagatorType>(flags);
 }
 
-void SetupPropagators(PropagatorFlags flags) {
+void SetupPropagators(PropagatorType flags) {
   namespace contextprop = opentelemetry::context::propagation;
   namespace traceprop = opentelemetry::trace::propagation;
   namespace baggageprop = opentelemetry::baggage::propagation;
 
   std::vector<std::unique_ptr<contextprop::TextMapPropagator>> propagators;
 
-  flags = flags | EnvPropagatorFlags();
-
-  if (flags & Propagator_TraceContext) {
+  if (flags & PropagatorType_TraceContext) {
     propagators.emplace_back(new traceprop::HttpTraceContext());
   }
 
-  if (flags & Propagator_B3) {
+  if (flags & PropagatorType_B3) {
     propagators.emplace_back(new traceprop::B3Propagator());
   }
 
-  if (flags & Propagator_B3Multi) {
+  if (flags & PropagatorType_B3Multi) {
     propagators.emplace_back(new traceprop::B3PropagatorMultiHeader());
   }
 
-  if (flags & Propagator_Baggage) {
+  if (flags & PropagatorType_Baggage) {
     propagators.emplace_back(new baggageprop::BaggagePropagator());
   }
 
@@ -207,15 +208,63 @@ void SetupPropagators(PropagatorFlags flags) {
   contextprop::GlobalTextMapPropagator::SetGlobalPropagator(composite);
 }
 
+bool IsSupportedOtlpProtocol(const std::string& proto) {
+  return proto == "grpc" || proto == "http/json" || proto == "http/protobuf";
+}
+
+OpenTelemetryOptions ApplyDefaults(OpenTelemetryOptions options) {
+  options.resourceAttributes =
+    MergeEnvAttributes(options.resourceAttributes, GetEnvResourceAttribs());
+
+  if (options.exporterType == ExporterType_None) {
+    auto envExporter = GetEnv("OTEL_TRACES_EXPORTER", "otlp");
+
+    if (envExporter == "jaeger-thrift-splunk") {
+      options.exporterType = ExporterType_JaegerThriftHttp;
+    } else {
+      options.exporterType = ExporterType_Otlp;
+    }
+  }
+
+  if (options.propagators == PropagatorType_None) {
+    options.propagators = EnvPropagatorFlags();
+
+    if (options.propagators == PropagatorType_None) {
+      options.propagators =
+        static_cast<PropagatorType>(PropagatorType_TraceContext | PropagatorType_Baggage);
+    }
+  }
+
+  options.otlpEndpoint = options.otlpEndpoint.empty()
+                           ? GetEnv("OTEL_EXPORTER_OTLP_ENDPOINT", "localhost:4317")
+                           : options.otlpEndpoint;
+
+  options.otlpProtocol = options.otlpProtocol.empty()
+                           ? GetEnv("OTEL_EXPORTER_OTLP_PROTOCOL", "grpc")
+                           : options.otlpProtocol;
+
+  if (!IsSupportedOtlpProtocol(options.otlpProtocol)) {
+    options.otlpProtocol = "grpc";
+  }
+
+  options.jaegerEndpoint =
+    options.jaegerEndpoint.empty()
+      ? GetEnv("OTEL_EXPORTER_JAEGER_ENDPOINT", "http://localhost:9080/v1/trace")
+      : options.jaegerEndpoint;
+
+  options.accessToken =
+    options.accessToken.empty() ? GetEnv("SPLUNK_ACCESS_TOKEN", "") : options.accessToken;
+
+  return options;
+}
+
 } // namespace
 
 opentelemetry::nostd::shared_ptr<opentelemetry::trace::TracerProvider>
-InitOpentelemetry(const OpenTelemetryOptions& options) {
-  auto optres = sdkresource::Resource::Create(options.resourceAttributes);
+InitOpentelemetry(const OpenTelemetryOptions& userOptions) {
+  OpenTelemetryOptions options = ApplyDefaults(userOptions);
 
-  auto envResource = GetEnvResource(options.resourceAttributes);
-
-  auto resource = sdkresource::Resource::Create(options.resourceAttributes).Merge(envResource);
+  auto resource = sdkresource::Resource::Create(options.resourceAttributes);
 
   auto exporter = CreateExporter(options);
   sdktrace::BatchSpanProcessorOptions processorOptions;
@@ -230,6 +279,42 @@ InitOpentelemetry(const OpenTelemetryOptions& options) {
   SetupPropagators(options.propagators);
 
   return provider;
+}
+
+OpenTelemetryOptions& OpenTelemetryOptions::WithServiceName(const std::string& serviceName) {
+  resourceAttributes.SetAttribute("service.name", serviceName);
+  return *this;
+}
+
+OpenTelemetryOptions&
+OpenTelemetryOptions::WithDeploymentEnvironment(const std::string& deploymentEnvironment) {
+  resourceAttributes.SetAttribute("deployment.environment", deploymentEnvironment);
+  return *this;
+}
+
+OpenTelemetryOptions& OpenTelemetryOptions::WithServiceVersion(const std::string& serviceVersion) {
+  resourceAttributes.SetAttribute("service.version", serviceVersion);
+  return *this;
+}
+
+OpenTelemetryOptions& OpenTelemetryOptions::WithExporter(ExporterType type) {
+  exporterType = type;
+  return *this;
+}
+
+OpenTelemetryOptions& OpenTelemetryOptions::WithOtlpEndpoint(const std::string& endpoint) {
+  otlpEndpoint = endpoint;
+  return *this;
+}
+
+OpenTelemetryOptions& OpenTelemetryOptions::WithJaegerEndpoint(const std::string& endpoint) {
+  jaegerEndpoint = endpoint;
+  return *this;
+}
+
+OpenTelemetryOptions& OpenTelemetryOptions::WithPropagators(PropagatorType flags) {
+  propagators = flags;
+  return *this;
 }
 
 } // namespace splunk

@@ -2,7 +2,7 @@ receivers:
   jaeger:
     protocols:
       thrift_http:
-        endpoint: 0.0.0.0:14268
+        endpoint: 0.0.0.0:9080
   otlp:
     protocols:
       grpc:

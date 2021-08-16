@@ -4,3 +4,6 @@
 [submodule "grpc"]
 	path = grpc
 	url = https://github.com/grpc/grpc.git
+[submodule "thrift"]
+	path = thrift
+	url = https://github.com/apache/thrift.git
