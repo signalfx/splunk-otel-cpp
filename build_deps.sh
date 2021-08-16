@@ -39,12 +39,15 @@ cd ${ROOT_DIR}/thrift/cmake_build
 cmake \
   -DBUILD_TESTING=OFF \
   -DWITH_LIBEVENT=OFF \
+  -DWITH_QT5=OFF \
+  -DWITH_ZLIB=OFF \
   -DBUILD_COMPILER=OFF \
   -DBUILD_AS3=OFF \
   -DBUILD_JAVA=OFF \
   -DBUILD_JAVASCRIPT=OFF \
   -DBUILD_NODEJS=OFF \
   -DBUILD_PYTHON=OFF \
+  -DBUILD_HASKELL=OFF \
   "$@" \
    ..
 make -j$(nproc)
