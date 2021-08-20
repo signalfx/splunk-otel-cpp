@@ -40,7 +40,7 @@ jobs:
       - name: Build distro
         run: |
           cd docker
-          docker run -v $GITHUB_WORKSPACE:/splunk-otel-cpp -v ./output:/distro-out splunk-otelcpp-alpine:latest build_splunk_distro
+          docker run -v $GITHUB_WORKSPACE:/splunk-otel-cpp -v $GITHUB_WORKSPACE/docker/output:/distro-out splunk-otelcpp-alpine:latest build_splunk_distro
       - name: compress artifacts
         id: artifacts
         run: |
