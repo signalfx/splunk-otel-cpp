@@ -10,18 +10,19 @@ include(CMakeFindDependencyMacro)
 find_dependency(Protobuf REQUIRED)
 find_dependency(gRPC REQUIRED)
 find_dependency(opentelemetry-cpp REQUIRED)
-find_dependency(CURL REQUIRED)
 find_dependency(absl REQUIRED)
 find_dependency(nlohmann_json REQUIRED)
 
-get_filename_component(SplunkOpenTelemetry_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+set(SPLUNK_CPP_WITH_JAEGER_EXPORTER @SPLUNK_CPP_WITH_JAEGER_EXPORTER@)
+if (SPLUNK_CPP_WITH_JAEGER_EXPORTER)
+  find_dependency(Thrift REQUIRED)
+  find_dependency(CURL REQUIRED)
+endif()
+
 set_and_check(SplunkOpenTelemetry_INCLUDE_DIRS "@PACKAGE_INCLUDE_INSTALL_DIR@")
 set_and_check(SplunkOpenTelemetry_LIBRARY_DIRS "@PACKAGE_CMAKE_INSTALL_LIBDIR@")
 
-
-if(NOT TARGET foo AND NOT FooBar_BINARY_DIR)
-    include("${SplunkOpenTelemetry_CMAKE_DIR}/SplunkOpenTelemetryTargets.cmake")
-endif()
+include("${CMAKE_CURRENT_LIST_DIR}/SplunkOpenTelemetryTargets.cmake")
 
 set(SplunkOpenTelemetry_LIBRARIES
   SplunkOpenTelemetry::SplunkOpenTelemetry

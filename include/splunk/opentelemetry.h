@@ -2,6 +2,7 @@
 
 #include <opentelemetry/sdk/resource/resource.h>
 #include <opentelemetry/trace/provider.h>
+#include "splunk_config.h"
 
 namespace splunk {
 
@@ -16,7 +17,9 @@ enum PropagatorType {
 enum ExporterType {
   ExporterType_None,
   ExporterType_Otlp,
+#if SPLUNK_HAS_JAEGER
   ExporterType_JaegerThriftHttp,
+#endif
 };
 
 struct OpenTelemetryOptions {

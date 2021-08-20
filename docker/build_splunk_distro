@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+
+set -ex
+
+mkdir -p /distro-build
+cd /distro-build
+cmake -DCMAKE_PREFIX_PATH=/splunk-cpp-distro \
+  -DCMAKE_INSTALL_PREFIX=/splunk-cpp-distro \
+  -DSPLUNK_CPP_TESTS=OFF \
+  -DSPLUNK_CPP_EXAMPLES=OFF \
+  -DCMAKE_BUILD_TYPE=Release \
+  /splunk-otel-cpp
+make -j$(nproc)
+make install
+
+rm -rf /distro-out/*
+cp -r /splunk-cpp-distro /distro-out
