@@ -6,6 +6,7 @@ mkdir -p /distro-build
 cd /distro-build
 cmake -DCMAKE_PREFIX_PATH=/splunk-cpp-distro \
   -DCMAKE_INSTALL_PREFIX=/splunk-cpp-distro \
+  -DCMAKE_INSTALL_LIBDIR=lib \
   -DSPLUNK_CPP_TESTS=OFF \
   -DSPLUNK_CPP_EXAMPLES=OFF \
   -DCMAKE_BUILD_TYPE=Release \

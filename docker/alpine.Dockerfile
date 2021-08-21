@@ -20,6 +20,7 @@ RUN cd grpc \
   -DgRPC_BUILD_GRPC_RUBY_PLUGIN=OFF \
   -DgRPC_BACKWARDS_COMPATIBILITY_MODE=ON \
   -DCMAKE_INSTALL_PREFIX=/splunk-cpp-distro \
+  -DCMAKE_INSTALL_LIBDIR=lib \
   .. \
   && make -j$(nproc) \
   && make install
@@ -31,6 +32,7 @@ RUN cd /grpc/third_party/abseil-cpp \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX=/splunk-cpp-distro \
   -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+  -DCMAKE_INSTALL_LIBDIR=lib \
   ../.. \
   && make -j$(nproc) \
   && make install
@@ -50,6 +52,7 @@ RUN cd /opentelemetry-cpp \
     -DWITH_EXAMPLES=OFF \
     -DCMAKE_PREFIX_PATH=/splunk-cpp-distro \
     -DCMAKE_INSTALL_PREFIX=/splunk-cpp-distro \
+    -DCMAKE_INSTALL_LIBDIR=lib \
     .. \
   && make -j$(nproc) \
   && make install
