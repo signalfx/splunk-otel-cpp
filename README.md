@@ -101,7 +101,7 @@ Note: options passed via `splunk::OpenTelemetryOptions` take preference over env
 | OTEL_TRACES_EXPORTER                 | `otlp`                        | Trace exporter to use. Possible values: `otlp`, `jaeger-thrift-splunk`. |
 | OTEL_EXPORTER_OTLP_PROTOCOL          | `grpc`                        | OTLP transport to use. Possible values: `grpc`. |
 | OTEL_EXPORTER_OTLP_ENDPOINT          | `localhost:4317` (gRPC) or `http://localhost:4317/v1/traces` |
-| OTEL_EXPORTER_JAEGER_ENDPOINT        | `http://localhost:9080/v1/trace` |
+| OTEL_EXPORTER_JAEGER_ENDPOINT        | `http://localhost:9080/v1/trace` | Needs to be compiled with Jaeger support
 | SPLUNK_ACCESS_TOKEN                  | none                          | Only required when Splunk OpenTelemetry Connector is not used. |
 
 ## Requirements
