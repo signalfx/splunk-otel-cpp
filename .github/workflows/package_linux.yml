@@ -41,13 +41,12 @@ jobs:
         run: |
           cd docker
           docker run -v $GITHUB_WORKSPACE:/splunk-otel-cpp -v $GITHUB_WORKSPACE/docker/output:/distro-out splunk-otelcpp-alpine:latest build_splunk_distro
-      - name: compress artifacts
-        id: artifacts
+      - name: rename directory
         run: |
           cd docker/output
-          tar -czvf splunk-cpp.tar.gz splunk-cpp-distro
+          mv splunk-cpp-distro splunk-opentelemetry-cpp
       - name: upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: splunk-opentelemetry-cpp.tar.gz
-          path: docker/output/splunk-cpp.tar.gz
+          name: splunk-opentelemetry-cpp
+          path: docker/output/splunk-opentelemetry-cpp
