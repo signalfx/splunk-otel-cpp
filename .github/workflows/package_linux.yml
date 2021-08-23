@@ -49,4 +49,5 @@ jobs:
       - name: upload artifacts
         uses: actions/upload-artifact@v2
         with:
+          name: splunk-opentelemetry-cpp.tar.gz
           path: docker/output/splunk-cpp.tar.gz
