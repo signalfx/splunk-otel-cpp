@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build-test:
+  build-linux-artifact:
     runs-on: ubuntu-20.04
     steps:
       - name: checkout
@@ -48,5 +48,5 @@ jobs:
       - name: upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: splunk-opentelemetry-cpp-linux.zip
+          name: splunk-opentelemetry-cpp-linux
           path: docker/output/splunk-opentelemetry-cpp
