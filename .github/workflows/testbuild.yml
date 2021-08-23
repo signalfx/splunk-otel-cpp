@@ -26,6 +26,7 @@ jobs:
           cd build
           cmake -DCMAKE_INSTALL_PREFIX=$HOME/splunk-otel-cpp \
             -DCMAKE_PREFIX_PATH=$HOME/splunk-otel-cpp \
+            -DSPLUNK_CPP_WITH_JAEGER_EXPORTER=ON \
             ..
           make install
       - name: Spin up collector image

@@ -1,0 +1,9 @@
+version: '3.6'
+
+services:
+  builder:
+    image: splunk-otel-cpp-build:latest
+    volumes:
+      - ../:/splunk-otel-cpp
+      - ./output:/distro-out
+    command: build_splunk_distro

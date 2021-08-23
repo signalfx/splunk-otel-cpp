@@ -1,0 +1,52 @@
+name: Linux package
+
+on:
+  push:
+    branches: "*"
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-linux-artifact:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+      - name: setup buildx
+        id: buildx
+        uses: docker/setup-buildx-action@master
+        with:
+          install: true
+      - name: cache docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/buildx-cache
+          key: alpine-otelcpp-1.0.0-rc4
+      - name: build Alpine image
+        run: |
+          cd docker
+          docker buildx build -t splunk-otelcpp-alpine:latest \
+            -f alpine.Dockerfile \
+            --cache-from type=local,src=/tmp/buildx-cache/otelcpp \
+            --cache-to type=local,dest=/tmp/buildx-cache/otelcpp-new \
+            --load \
+            .
+      - name: update Docker cache
+        run: |
+          rm -rf /tmp/buildx-cache/otelcpp
+          mv /tmp/buildx-cache/otelcpp-new /tmp/buildx-cache/otelcpp
+      - name: Build distro
+        run: |
+          cd docker
+          docker run -v $GITHUB_WORKSPACE:/splunk-otel-cpp -v $GITHUB_WORKSPACE/docker/output:/distro-out splunk-otelcpp-alpine:latest build_splunk_distro
+      - name: rename directory
+        run: |
+          cd docker/output
+          mv splunk-cpp-distro splunk-opentelemetry-cpp
+      - name: upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: splunk-opentelemetry-cpp-linux
+          path: docker/output/splunk-opentelemetry-cpp

@@ -1,0 +1,3 @@
+#pragma once
+
+#define SPLUNK_HAS_JAEGER @SPLUNK_HAS_JAEGER@

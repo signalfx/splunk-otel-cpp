@@ -3,14 +3,16 @@
 #include <opentelemetry/baggage/propagation/baggage_propagator.h>
 #include <opentelemetry/context/propagation/composite_propagator.h>
 #include <opentelemetry/context/propagation/global_propagator.h>
-#include <opentelemetry/exporters/jaeger/jaeger_exporter.h>
 #include <opentelemetry/exporters/otlp/otlp_grpc_exporter.h>
-#include <opentelemetry/exporters/otlp/otlp_http_exporter.h>
 #include <opentelemetry/sdk/trace/batch_span_processor.h>
 #include <opentelemetry/sdk/trace/exporter.h>
 #include <opentelemetry/sdk/trace/tracer_provider.h>
 #include <opentelemetry/trace/propagation/b3_propagator.h>
 #include <opentelemetry/trace/propagation/http_trace_context.h>
+
+#if SPLUNK_HAS_JAEGER
+#include <opentelemetry/exporters/jaeger/jaeger_exporter.h>
+#endif
 
 #include <cctype>
 #include <cstdlib>
@@ -71,24 +73,6 @@ std::string GetEnv(const std::string& key, const std::string& defaultVal = "") {
 }
 
 std::unique_ptr<sdktrace::SpanExporter> CreateOtlpExporter(const OpenTelemetryOptions& options) {
-  if (options.otlpProtocol == "http/json") {
-    opentelemetry::exporter::otlp::OtlpHttpExporterOptions exporterOptions;
-    exporterOptions.url = options.otlpEndpoint;
-    exporterOptions.content_type = opentelemetry::exporter::otlp::HttpRequestContentType::kJson;
-
-    return std::unique_ptr<sdktrace::SpanExporter>(
-      new opentelemetry::exporter::otlp::OtlpHttpExporter(exporterOptions));
-  }
-
-  if (options.otlpProtocol == "http/protobuf") {
-    opentelemetry::exporter::otlp::OtlpHttpExporterOptions exporterOptions;
-    exporterOptions.url = options.otlpEndpoint;
-    exporterOptions.content_type = opentelemetry::exporter::otlp::HttpRequestContentType::kBinary;
-
-    return std::unique_ptr<sdktrace::SpanExporter>(
-      new opentelemetry::exporter::otlp::OtlpHttpExporter(exporterOptions));
-  }
-
   opentelemetry::exporter::otlp::OtlpGrpcExporterOptions exporterOptions;
   exporterOptions.endpoint = options.otlpEndpoint;
 
@@ -96,25 +80,25 @@ std::unique_ptr<sdktrace::SpanExporter> CreateOtlpExporter(const OpenTelemetryOp
     new opentelemetry::exporter::otlp::OtlpGrpcExporter(exporterOptions));
 }
 
-std::unique_ptr<sdktrace::SpanExporter> CreateJaegerExporter(const OpenTelemetryOptions& options) {
-  opentelemetry::exporter::jaeger::JaegerExporterOptions jaegerOptions;
-  jaegerOptions.endpoint = options.jaegerEndpoint;
-
-  if (!options.accessToken.empty()) {
-    jaegerOptions.headers = {{"X-SF-TOKEN", options.accessToken}};
-  }
-
-  jaegerOptions.transport_format = opentelemetry::exporter::jaeger::TransportFormat::kThriftHttp;
-  auto exporter = std::unique_ptr<sdktrace::SpanExporter>(
-    new opentelemetry::exporter::jaeger::JaegerExporter(jaegerOptions));
-
-  return exporter;
-}
-
 std::unique_ptr<sdktrace::SpanExporter> CreateExporter(const OpenTelemetryOptions& options) {
   switch (options.exporterType) {
-    case ExporterType_JaegerThriftHttp:
-      return CreateJaegerExporter(options);
+#if SPLUNK_HAS_JAEGER
+    case ExporterType_JaegerThriftHttp: {
+      opentelemetry::exporter::jaeger::JaegerExporterOptions jaegerOptions;
+      jaegerOptions.endpoint = options.jaegerEndpoint;
+
+      if (!options.accessToken.empty()) {
+        jaegerOptions.headers = {{"X-SF-TOKEN", options.accessToken}};
+      }
+
+      jaegerOptions.transport_format =
+        opentelemetry::exporter::jaeger::TransportFormat::kThriftHttp;
+      auto exporter = std::unique_ptr<sdktrace::SpanExporter>(
+        new opentelemetry::exporter::jaeger::JaegerExporter(jaegerOptions));
+
+      return exporter;
+    }
+#endif
     default: {
       return CreateOtlpExporter(options);
     }
@@ -208,15 +192,14 @@ void SetupPropagators(PropagatorType flags) {
   contextprop::GlobalTextMapPropagator::SetGlobalPropagator(composite);
 }
 
-bool IsSupportedOtlpProtocol(const std::string& proto) {
-  return proto == "grpc" || proto == "http/json" || proto == "http/protobuf";
-}
+bool IsSupportedOtlpProtocol(const std::string& proto) { return proto == "grpc"; }
 
 OpenTelemetryOptions ApplyDefaults(OpenTelemetryOptions options) {
   options.resourceAttributes =
     MergeEnvAttributes(options.resourceAttributes, GetEnvResourceAttribs());
 
   if (options.exporterType == ExporterType_None) {
+#if SPLUNK_HAS_JAEGER
     auto envExporter = GetEnv("OTEL_TRACES_EXPORTER", "otlp");
 
     if (envExporter == "jaeger-thrift-splunk") {
@@ -224,6 +207,9 @@ OpenTelemetryOptions ApplyDefaults(OpenTelemetryOptions options) {
     } else {
       options.exporterType = ExporterType_Otlp;
     }
+#else
+    options.exporterType = ExporterType_Otlp;
+#endif
   }
 
   if (options.propagators == PropagatorType_None) {
