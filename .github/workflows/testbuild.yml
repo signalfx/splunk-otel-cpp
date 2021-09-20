@@ -15,7 +15,9 @@ jobs:
         with:
           submodules: 'recursive'
       - name: install packages
-        run: sudo apt install cmake libcurl4-openssl-dev libboost-all-dev
+        run: |
+          sudo apt update
+          sudo apt install cmake libcurl4-openssl-dev libboost-all-dev
       - name: build deps
         run: |
           mkdir -p $HOME/splunk-otel-cpp
