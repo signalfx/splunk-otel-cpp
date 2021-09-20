@@ -15,7 +15,9 @@ jobs:
         with:
           submodules: 'recursive'
       - name: install packages
-        run: sudo apt install cmake libcurl4-openssl-dev libboost-all-dev
+        run: |
+          sudo apt update
+          sudo apt install cmake libcurl4-openssl-dev libboost-all-dev
       - name: build deps
         run: |
           mkdir -p $HOME/splunk-otel-cpp
@@ -27,6 +29,7 @@ jobs:
           cmake -DCMAKE_INSTALL_PREFIX=$HOME/splunk-otel-cpp \
             -DCMAKE_PREFIX_PATH=$HOME/splunk-otel-cpp \
             -DSPLUNK_CPP_WITH_JAEGER_EXPORTER=ON \
+            -DSPLUNK_CPP_TESTS=ON \
             ..
           make install
       - name: Spin up collector image

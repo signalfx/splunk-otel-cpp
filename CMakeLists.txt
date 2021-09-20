@@ -8,9 +8,9 @@ set(PACKAGE_VERSION "0.1.0")
 
 set(CMAKE_CXX_STANDARD 11)
 
-option(SPLUNK_CPP_TESTS "Enable building of tests" ON)
+option(SPLUNK_CPP_TESTS "Enable building of tests" OFF)
 option(SPLUNK_CPP_EXAMPLES "Enable building of examples" ON)
-option(SPLUNK_CPP_WITH_JAEGER_EXPORTER "Enable Jaeger exporter" OFF)
+option(SPLUNK_CPP_WITH_JAEGER_EXPORTER "Enable Jaeger exporter" ON)
 
 find_package(Protobuf REQUIRED)
 find_package(gRPC REQUIRED)
@@ -24,6 +24,8 @@ if (SPLUNK_CPP_WITH_JAEGER_EXPORTER)
   set(SPLUNK_CPP_JAEGER_EXPORTER_LIBS
     CURL::libcurl
     thrift::thrift)
+else()
+  find_package(CURL)
 endif()
 
 add_library(SplunkOpenTelemetry

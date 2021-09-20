@@ -9,6 +9,7 @@ cmake -DCMAKE_PREFIX_PATH=/splunk-cpp-distro \
   -DCMAKE_INSTALL_LIBDIR=lib \
   -DSPLUNK_CPP_TESTS=OFF \
   -DSPLUNK_CPP_EXAMPLES=OFF \
+  -DSPLUNK_CPP_WITH_JAEGER_EXPORTER=OFF \
   -DCMAKE_BUILD_TYPE=Release \
   /splunk-otel-cpp
 make -j$(nproc)
