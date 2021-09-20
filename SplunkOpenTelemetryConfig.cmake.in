@@ -17,6 +17,8 @@ set(SPLUNK_CPP_WITH_JAEGER_EXPORTER @SPLUNK_CPP_WITH_JAEGER_EXPORTER@)
 if (SPLUNK_CPP_WITH_JAEGER_EXPORTER)
   find_dependency(Thrift REQUIRED)
   find_dependency(CURL REQUIRED)
+else()
+  find_dependency(CURL)
 endif()
 
 set_and_check(SplunkOpenTelemetry_INCLUDE_DIRS "@PACKAGE_INCLUDE_INSTALL_DIR@")

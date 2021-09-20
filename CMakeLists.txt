@@ -24,6 +24,8 @@ if (SPLUNK_CPP_WITH_JAEGER_EXPORTER)
   set(SPLUNK_CPP_JAEGER_EXPORTER_LIBS
     CURL::libcurl
     thrift::thrift)
+else()
+  find_package(CURL)
 endif()
 
 add_library(SplunkOpenTelemetry
