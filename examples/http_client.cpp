@@ -5,8 +5,8 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include <opentelemetry/context/propagation/global_propagator.h>
 #include <splunk/opentelemetry.h>
+#include <opentelemetry/context/propagation/global_propagator.h>
 #include <string>
 
 #include "http_common.h"

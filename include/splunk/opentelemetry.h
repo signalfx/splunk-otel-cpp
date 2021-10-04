@@ -1,5 +1,6 @@
 #pragma once
 
+#include <opentelemetry/exporters/otlp/otlp_grpc_exporter.h>
 #include <opentelemetry/sdk/resource/resource.h>
 #include <opentelemetry/trace/provider.h>
 #include "splunk_config.h"

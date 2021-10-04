@@ -47,7 +47,7 @@ $ git clone --recurse-submodules https://github.com/signalfx/splunk-otel-cpp.git
 $ ./build_deps.sh -DCMAKE_INSTALL_PREFIX=/path/to/splunk-otel-cpp-install
 $ mkdir build
 $ cd build
-$ cmake -DCMAKE_INSTALL_PREFIX=/path/to/splunk-otel-cpp-install -DCMAKE_PREFIX_PATH=/path/to/splunk-otel-cpp-install ..
+$ cmake -DCMAKE_INSTALL_PREFIX=/path/to/splunk-otel-cpp-install ..
 $ make install
 ```
 

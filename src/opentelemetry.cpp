@@ -3,7 +3,6 @@
 #include <opentelemetry/baggage/propagation/baggage_propagator.h>
 #include <opentelemetry/context/propagation/composite_propagator.h>
 #include <opentelemetry/context/propagation/global_propagator.h>
-#include <opentelemetry/exporters/otlp/otlp_grpc_exporter.h>
 #include <opentelemetry/sdk/trace/batch_span_processor.h>
 #include <opentelemetry/sdk/trace/exporter.h>
 #include <opentelemetry/sdk/trace/tracer_provider.h>
