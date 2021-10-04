@@ -70,11 +70,13 @@ jobs:
             opentelemetry-cpp/third_party/nlohmann-json/.git \
             opentelemetry-cpp/third_party/nlohmann-json/third_party \
             opentelemetry-cpp/third_party/opentelemetry-proto/.git
-      - name: copy files
+      - name: archive files
         run: |
           cd $GITHUB_WORKSPACE
           mv splunk-otel-cpp splunk-opentelemetry-cpp
           tar -zcvf splunk-opentelemetry-cpp.tar.gz splunk-opentelemetry-cpp
+          pwd
+          ls -la
       - name: upload artifact
         uses: actions/upload-artifact@v2
         with:
