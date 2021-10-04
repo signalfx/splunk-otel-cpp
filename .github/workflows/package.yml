@@ -57,8 +57,10 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: 'recursive'
+          path: 'splunk-otel-cpp'
       - name: prune files
         run: |
+          cd splunk-otel-cpp
           rm -rf .git examples httpd internal grpc thrift docker test build_deps.sh \
             opentelemetry-cpp/.git \
             opentelemetry-cpp/third_party/benchmark \
@@ -71,7 +73,6 @@ jobs:
       - name: copy files
         run: |
           cd $GITHUB_WORKSPACE
-          ls -la
           mv splunk-otel-cpp splunk-opentelemetry-cpp
           tar -zcvf splunk-opentelemetry-cpp.tar.gz splunk-opentelemetry-cpp
       - name: upload artifact
