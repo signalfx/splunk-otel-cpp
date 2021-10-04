@@ -79,7 +79,7 @@ jobs:
           name: splunk-opentelemetry-cpp-conan.tar.gz
           path: ${GITHUB_WORKSPACE}/splunk-opentelemetry-cpp.tar.gz
       - name: release
-        uses: softprops/action-gh-rlease@v1
+        uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           name: splunk-opentelemetry-cpp-${GITHUB_REF}-conan.tar.gz
