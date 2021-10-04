@@ -72,19 +72,19 @@ jobs:
             opentelemetry-cpp/third_party/opentelemetry-proto/.git
       - name: archive files
         run: |
-          cd $GITHUB_WORKSPACE
+          ls -la
           mv splunk-otel-cpp splunk-opentelemetry-cpp
-          tar -zcvf splunk-opentelemetry-cpp.tar.gz splunk-opentelemetry-cpp
+          tar -zcf splunk-opentelemetry-cpp.tar.gz splunk-opentelemetry-cpp
           pwd
           ls -la
       - name: upload artifact
         uses: actions/upload-artifact@v2
         with:
           name: splunk-opentelemetry-cpp-conan.tar.gz
-          path: $GITHUB_WORKSPACE/splunk-opentelemetry-cpp.tar.gz
+          path: splunk-opentelemetry-cpp.tar.gz
       - name: release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           name: splunk-opentelemetry-cpp-${GITHUB_REF}-conan.tar.gz
-          path: $GITHUB_WORKSPACE/splunk-opentelemetry-cpp.tar.gz
+          path: splunk-opentelemetry-cpp.tar.gz
