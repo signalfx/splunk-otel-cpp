@@ -71,6 +71,7 @@ jobs:
       - name: copy files
         run: |
           cd ${GITHUB_WORKSPACE}
+          ls -la
           mv splunk-otel-cpp splunk-opentelemetry-cpp
           tar -zcvf splunk-opentelemetry-cpp.tar.gz splunk-opentelemetry-cpp
       - name: upload artifact
