@@ -11,8 +11,6 @@ class SplunkOpentelemetryConan(ConanFile):
     description = "Splunk's distribution of OpenTelemetry C++"
     topics = ("opentelemetry", "observability", "tracing")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"fPIC": [True, False]}
-    default_options = {"fPIC": True}
     generators = "cmake_find_package"
     requires = "grpc/1.37.1", "protobuf/3.17.1", "libcurl/7.79.1"
     exports_sources = [
@@ -23,10 +21,6 @@ class SplunkOpentelemetryConan(ConanFile):
       "SplunkOpenTelemetryConfig.cmake.in"
     ]
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def _build_otel_cpp(self):
       cmake = CMake(self)
       prefix_paths = [
@@ -35,9 +29,7 @@ class SplunkOpentelemetryConan(ConanFile):
       ]
 
       defs = {
-        'CMAKE_BUILD_TYPE': 'Release',
         'CMAKE_PREFIX_PATH': ';'.join(prefix_paths),
-        'CMAKE_POSITION_INDEPENDENT_CODE': True,
         'WITH_OTLP': True,
         'WITH_OTLP_HTTP': False,
         'WITH_JAEGER': False,
@@ -53,8 +45,6 @@ class SplunkOpentelemetryConan(ConanFile):
         self._build_otel_cpp()
         cmake = CMake(self)
         defs = {
-          'CMAKE_BUILD_TYPE': 'Release',
-          'CMAKE_POSITION_INDEPENDENT_CODE': True,
           'SPLUNK_CPP_WITH_JAEGER_EXPORTER': False,
           'SPLUNK_CPP_EXAMPLES': False,
         }
