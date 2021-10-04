@@ -60,6 +60,21 @@ target_link_libraries(example ${SplunkOpenTelemetry_LIBRARIES})
 target_include_directories(example ${SplunkOpenTelemetry_INCLUDE_DIRS})
 ```
 
+### (Optional) Using Conan package manager with CMake
+
+* Update your `conanfile.txt`:
+  ```
+  [requires]
+  splunk-opentelemetry/0.1
+
+  [generators]
+  cmake_find_package
+  cmake_paths
+  ```
+* Add `include(${CMAKE_BINARY_DIR}/conan_paths.cmake)` to your CMakeLists.txt
+* Add `find_package(SplunkOpenTelemetry REQUIRED)` lines described earlier.
+* `mkdir build && cd build && conan install .. && cmake .. && make`
+
 4. Use it
 
 ```c++
