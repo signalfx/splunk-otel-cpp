@@ -3,7 +3,7 @@ from conans import ConanFile, CMake
 
 class SplunkOpentelemetryConan(ConanFile):
     name = "splunk-opentelemetry"
-    version = "0.2"
+    version = "0.3.0"
     license = "Apache 2.0"
     author = "Splunk"
     url = "https://github.com/signalfx/splunk-otel-cpp"
