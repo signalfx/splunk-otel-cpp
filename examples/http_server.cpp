@@ -5,9 +5,9 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include <opentelemetry/context/propagation/global_propagator.h>
-#include <opentelemetry/trace/propagation/detail/context.h>
 #include <splunk/opentelemetry.h>
+#include <opentelemetry/context/propagation/global_propagator.h>
+#include <opentelemetry/trace/context.h>
 #include <string>
 
 #include "http_common.h"
@@ -121,7 +121,7 @@ int main(int argc, char** argv) {
     opentelemetry::trace::StartSpanOptions startOptions;
     startOptions.kind = opentelemetry::trace::SpanKind::kServer;
 
-    auto parentSpan = opentelemetry::trace::propagation::GetSpan(parentContext);
+    auto parentSpan = opentelemetry::trace::GetSpan(parentContext);
 
     startOptions.parent = parentSpan->GetContext();
 

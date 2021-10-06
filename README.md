@@ -47,7 +47,7 @@ $ git clone --recurse-submodules https://github.com/signalfx/splunk-otel-cpp.git
 $ ./build_deps.sh -DCMAKE_INSTALL_PREFIX=/path/to/splunk-otel-cpp-install
 $ mkdir build
 $ cd build
-$ cmake -DCMAKE_INSTALL_PREFIX=/path/to/splunk-otel-cpp-install -DCMAKE_PREFIX_PATH=/path/to/splunk-otel-cpp-install ..
+$ cmake -DCMAKE_INSTALL_PREFIX=/path/to/splunk-otel-cpp-install ..
 $ make install
 ```
 
@@ -59,6 +59,21 @@ add_program(example example.cpp)
 target_link_libraries(example ${SplunkOpenTelemetry_LIBRARIES})
 target_include_directories(example ${SplunkOpenTelemetry_INCLUDE_DIRS})
 ```
+
+### (Optional) Using Conan package manager with CMake
+
+* Update your `conanfile.txt`:
+  ```
+  [requires]
+  splunk-opentelemetry/0.1
+
+  [generators]
+  cmake_find_package
+  cmake_paths
+  ```
+* Add `include(${CMAKE_BINARY_DIR}/conan_paths.cmake)` to your CMakeLists.txt
+* Add `find_package(SplunkOpenTelemetry REQUIRED)` lines described earlier.
+* `mkdir build && cd build && conan install .. && cmake .. && make`
 
 4. Use it
 

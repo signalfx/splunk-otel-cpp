@@ -1,10 +1,7 @@
 set -ex
 
-mkdir -p third_party
-
 BUILD_TYPE=Release
 ROOT_DIR=$(pwd)
-THIRD_PARTY_DIR=${ROOT_DIR}/third_party
 
 mkdir -p ${ROOT_DIR}/grpc/build
 cd ${ROOT_DIR}/grpc/build
@@ -57,11 +54,10 @@ mkdir -p ${ROOT_DIR}/opentelemetry-cpp/build
 cd ${ROOT_DIR}/opentelemetry-cpp/build
 cmake \
   -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
-  -DCMAKE_PREFIX_PATH=${THIRD_PARTY_DIR} \
   -DWITH_OTLP=ON \
   -DWITH_OTLP_HTTP=OFF \
   -DWITH_JAEGER=ON \
-  -DWITH_ABSEIL=ON \
+  -DWITH_ABSEIL=OFF \
   -DBUILD_TESTING=OFF \
   -DWITH_EXAMPLES=OFF \
   "$@" \

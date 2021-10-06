@@ -10,7 +10,6 @@ include(CMakeFindDependencyMacro)
 find_dependency(Protobuf REQUIRED)
 find_dependency(gRPC REQUIRED)
 find_dependency(opentelemetry-cpp REQUIRED)
-find_dependency(absl REQUIRED)
 find_dependency(nlohmann_json REQUIRED)
 
 set(SPLUNK_CPP_WITH_JAEGER_EXPORTER @SPLUNK_CPP_WITH_JAEGER_EXPORTER@)

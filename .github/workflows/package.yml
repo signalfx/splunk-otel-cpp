@@ -1,4 +1,4 @@
-name: Linux package
+name: Package
 
 on:
   push:
@@ -50,3 +50,38 @@ jobs:
         with:
           name: splunk-opentelemetry-cpp-linux
           path: docker/output/splunk-opentelemetry-cpp
+  generate-conan-source-artifact:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+          path: 'splunk-otel-cpp'
+      - name: prune files
+        run: |
+          cd splunk-otel-cpp
+          rm -rf .git examples httpd internal grpc thrift docker test build_deps.sh \
+            opentelemetry-cpp/.git \
+            opentelemetry-cpp/third_party/benchmark \
+            opentelemetry-cpp/third_party/googletest \
+            opentelemetry-cpp/third_party/ms-gsl \
+            opentelemetry-cpp/third_party/prometheus-cpp \
+            opentelemetry-cpp/third_party/nlohmann-json/.git \
+            opentelemetry-cpp/third_party/nlohmann-json/third_party \
+            opentelemetry-cpp/third_party/opentelemetry-proto/.git
+      - name: prepare tar
+        run: |
+          mv splunk-otel-cpp splunk-opentelemetry-cpp
+          tar -zcf splunk-opentelemetry-cpp.tar.gz splunk-opentelemetry-cpp
+      - name: upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: splunk-opentelemetry-cpp-conan
+          path: splunk-opentelemetry-cpp.tar.gz
+      - name: release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          name: splunk-opentelemetry-cpp-${GITHUB_REF}-conan.tar.gz
+          path: splunk-opentelemetry-cpp.tar.gz

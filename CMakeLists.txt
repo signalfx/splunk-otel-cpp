@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5.1)
 
-project(SplunkOpenTelemetry)
+project(SplunkOpenTelemetry CXX)
 
 include(CMakePackageConfigHelpers)
 
@@ -15,7 +15,6 @@ option(SPLUNK_CPP_WITH_JAEGER_EXPORTER "Enable Jaeger exporter" ON)
 find_package(Protobuf REQUIRED)
 find_package(gRPC REQUIRED)
 find_package(opentelemetry-cpp REQUIRED)
-find_package(absl REQUIRED)
 find_package(nlohmann_json REQUIRED)
 if (SPLUNK_CPP_WITH_JAEGER_EXPORTER)
   find_package(CURL REQUIRED)

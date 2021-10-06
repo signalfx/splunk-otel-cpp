@@ -37,7 +37,7 @@ RUN cd /grpc/third_party/abseil-cpp \
   && make -j$(nproc) \
   && make install
 
-RUN git clone --depth 1 --recurse-submodules -b v1.0.0-rc4 https://github.com/open-telemetry/opentelemetry-cpp
+RUN git clone --depth 1 --recurse-submodules -b v1.0.0 https://github.com/open-telemetry/opentelemetry-cpp
 
 RUN cd /opentelemetry-cpp \
   && mkdir -p build \
@@ -47,7 +47,7 @@ RUN cd /opentelemetry-cpp \
     -DWITH_OTLP=ON \
     -DWITH_OTLP_HTTP=OFF \
     -DWITH_JAEGER=OFF \
-    -DWITH_ABSEIL=ON \
+    -DWITH_ABSEIL=OFF \
     -DBUILD_TESTING=OFF \
     -DWITH_EXAMPLES=OFF \
     -DCMAKE_PREFIX_PATH=/splunk-cpp-distro \
