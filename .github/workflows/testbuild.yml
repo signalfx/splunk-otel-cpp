@@ -35,8 +35,8 @@ jobs:
       - name: Spin up collector image
         run: cd test && docker-compose up -d
       - name: Wait for collector
-        timeout-minutes: 2
+        timeout-minutes: 1
         run: |
-          while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:13133)" != "200" ]]; do sleep 1; done || false
+          while [[ "$(curl localhost:13133)" != "200" ]]; do sleep 1; done || false
       - name: run smoke tests
         run: cd build && make test
