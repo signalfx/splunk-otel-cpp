@@ -37,6 +37,7 @@ jobs:
       - name: Wait for collector
         timeout-minutes: 1
         run: |
+          chmod 777 data/trace.json
           while [[ "$(curl localhost:13133)" != "200" ]]; do sleep 1; done || false
       - name: run smoke tests
         run: cd build && make test
