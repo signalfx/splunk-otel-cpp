@@ -1,9 +1,10 @@
 #pragma once
 
+#include "splunk_config.h"
+#include "splunk_export.h"
 #include <opentelemetry/exporters/otlp/otlp_grpc_exporter.h>
 #include <opentelemetry/sdk/resource/resource.h>
 #include <opentelemetry/trace/provider.h>
-#include "splunk_config.h"
 
 namespace splunk {
 
@@ -23,7 +24,7 @@ enum ExporterType {
 #endif
 };
 
-struct OpenTelemetryOptions {
+struct SPLUNK_EXPORT OpenTelemetryOptions {
   opentelemetry::sdk::resource::ResourceAttributes resourceAttributes;
   ExporterType exporterType = ExporterType_None;
   PropagatorType propagators = PropagatorType_None;
@@ -42,6 +43,7 @@ struct OpenTelemetryOptions {
   OpenTelemetryOptions& WithPropagators(PropagatorType flags);
 };
 
+SPLUNK_EXPORT
 opentelemetry::nostd::shared_ptr<opentelemetry::trace::TracerProvider>
 InitOpentelemetry(const OpenTelemetryOptions& options = {});
 

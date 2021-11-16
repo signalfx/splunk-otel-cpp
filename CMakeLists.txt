@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.5.1)
 project(SplunkOpenTelemetry CXX)
 
 include(CMakePackageConfigHelpers)
+include(GenerateExportHeader)
 
 set(PACKAGE_VERSION "0.1.0")
 
@@ -30,6 +31,8 @@ endif()
 add_library(SplunkOpenTelemetry
   src/opentelemetry.cpp
 )
+
+generate_export_header(SplunkOpenTelemetry BASE_NAME splunk)
 
 target_link_libraries(SplunkOpenTelemetry
   PUBLIC
@@ -79,6 +82,7 @@ endif()
 
 install(FILES
   include/splunk/opentelemetry.h
+  ${PROJECT_BINARY_DIR}/splunk_export.h
   ${PROJECT_BINARY_DIR}/splunk_config.h
   DESTINATION include/splunk)
 

@@ -37,7 +37,7 @@ RUN cd /grpc/third_party/abseil-cpp \
   && make -j$(nproc) \
   && make install
 
-RUN git clone --depth 1 --recurse-submodules -b v1.0.0 https://github.com/open-telemetry/opentelemetry-cpp
+RUN git clone --depth 1 --recurse-submodules -b v1.0.1 https://github.com/open-telemetry/opentelemetry-cpp
 
 RUN cd /opentelemetry-cpp \
   && mkdir -p build \
