@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build-test:
+  build-test-linux:
     runs-on: ubuntu-20.04
     steps:
       - name: checkout
@@ -33,7 +33,10 @@ jobs:
             ..
           make install
       - name: Spin up collector image
-        run: cd test && docker-compose up -d
+        run: |
+          cd test 
+          chmod 777 data/trace.json
+          docker-compose up -d
       - name: Wait for collector
         timeout-minutes: 1
         run: |
