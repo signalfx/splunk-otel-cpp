@@ -34,6 +34,7 @@ make install
 mkdir -p ${ROOT_DIR}/thrift/cmake_build
 cd ${ROOT_DIR}/thrift/cmake_build
 cmake \
+  -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
   -DBUILD_TESTING=OFF \
   -DWITH_LIBEVENT=OFF \
   -DWITH_QT5=OFF \
