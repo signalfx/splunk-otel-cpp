@@ -65,7 +65,7 @@ target_include_directories(example ${SplunkOpenTelemetry_INCLUDE_DIRS})
 * Update your `conanfile.txt`:
   ```
   [requires]
-  splunk-opentelemetry/0.1
+  splunk-opentelemetry-cpp/0.4.0
 
   [generators]
   cmake_find_package
