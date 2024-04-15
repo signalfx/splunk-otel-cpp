@@ -17,6 +17,14 @@
 
 ---
 
+> ⚠️ Deprecation Notice
+
+> The Splunk Distribution of OpenTelemetry C++ is deprecated as of March 15, 2024 and will reach End of Support on September 15, 2025.
+> Until then, only critical security fixes and bug fixes will be provided. After the date, this repository will be archived and no longer maintained.
+> New customers instrumenting C++ applications should use the [OpenTelemetry Distribution of C++](https://github.com/open-telemetry/opentelemetry-cpp).
+> Existing customers should consider migrating to [OpenTelemetry Distribution of C++](https://github.com/open-telemetry/opentelemetry-c++) which offers similar capabilities.
+> To learn how to instrument C++ code see the [Splunk documentation](https://docs.splunk.com/observability/en/gdi/get-data-in/application/cpp/instrument-cpp.html).
+
 # Splunk Distribution of OpenTelemetry C++
 
 The Splunk Distribution of [OpenTelemetry C++](https://github.com/open-telemetry/opentelemetry-cpp) is a wrapper that
